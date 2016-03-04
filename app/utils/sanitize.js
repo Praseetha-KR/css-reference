@@ -1,6 +1,6 @@
-module.exports = cleanResponse;
+module.exports = sanitize;
 
-function cleanResponse(res) {
+function sanitize(res) {
     res = res.toObject();
     delete res['_id'];
     delete res['__v'];

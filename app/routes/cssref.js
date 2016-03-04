@@ -1,13 +1,16 @@
-var express         = require('express'),
-    bodyParser      = require('body-parser'),
-    mongoose        = require('mongoose'),
-    CssRef          = require('../models/cssref'),
-    router          = express.Router(),
-    cleanResponse   = require('../utils/cleanResponse');
+var express    = require('express'),
+    bodyParser = require('body-parser'),
+    mongoose   = require('mongoose'),
+    router     = express.Router(),
+    CssRef     = require('../models/cssref'),
+    sanitize   = require('../utils/sanitize');
 
 module.exports = router;
 
 router.use(function(req, res, next) {
+    /**
+     * Log req details
+     */
     console.log(req.method + ' ' +
         req.baseUrl + req.url + ' ' +
         res.statusCode + ' ' +
@@ -30,7 +33,7 @@ router.route('/css')
             if (err) {
                 res.send(err);
             }
-            res.json(cleanResponse(cssref));
+            res.json(sanitize(cssref));
         });
     })
     .get(function(req, res) {
@@ -39,7 +42,7 @@ router.route('/css')
                 res.send(err);
             }
             cssrefs = cssrefs.map(function(obj) {
-                return cleanResponse(obj)
+                return sanitize(obj)
             });
             res.json(cssrefs);
         })
@@ -47,19 +50,15 @@ router.route('/css')
 
 router.route('/css/:name')
     .get(function(req, res) {
-        CssRef.findOne({
-            name: req.params.name
-        }, function(err, cssref) {
+        CssRef.findOne({ name: req.params.name }, function(err, cssref) {
             if (err) {
                 res.send(err);
             }
-            res.json(cleanResponse(cssref));
+            res.json(sanitize(cssref));
         });
     })
     .put(function(req, res) {
-        CssRef.findOne({
-            name: req.params.name
-        }, function(err, cssref) {
+        CssRef.findOne({ name: req.params.name }, function(err, cssref) {
             if (err) {
                 res.send(err);
             }
@@ -68,14 +67,12 @@ router.route('/css/:name')
                 if (err) {
                     res.send(err);
                 }
-                res.json(cleanResponse(cssref));
+                res.json(sanitize(cssref));
             });
         });
     })
     .delete(function(req, res) {
-        CssRef.remove({
-            name: req.params.name
-        }, function(err, cssref) {
+        CssRef.remove({ name: req.params.name }, function(err, cssref) {
             if (err) {
                 res.send(err);
             }
