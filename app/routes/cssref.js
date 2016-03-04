@@ -1,9 +1,10 @@
-var express     = require('express'),
-    bodyParser  = require('body-parser'),
-    mongoose    = require('mongoose'),
-    CssRef      = require('../models/cssref');
+var express         = require('express'),
+    bodyParser      = require('body-parser'),
+    mongoose        = require('mongoose'),
+    CssRef          = require('../models/cssref'),
+    router          = express.Router(),
+    cleanResponse   = require('../utils/cleanResponse');
 
-var router = express.Router();
 module.exports = router;
 
 router.use(function(req, res, next) {
@@ -29,7 +30,7 @@ router.route('/css')
             if (err) {
                 res.send(err);
             }
-            res.json(cssref);
+            res.json(cleanResponse(cssref));
         });
     })
     .get(function(req, res) {
@@ -37,25 +38,28 @@ router.route('/css')
             if (err) {
                 res.send(err);
             }
+            cssrefs = cssrefs.map(function(obj) {
+                return cleanResponse(obj)
+            });
             res.json(cssrefs);
         })
     });
 
-router.route('/css/:ref_id')
+router.route('/css/:name')
     .get(function(req, res) {
-        CssRef.findById(req.params.ref_id, function(err, cssref) {
+        CssRef.findOne({
+            name: req.params.name
+        }, function(err, cssref) {
             if (err) {
-                if (cssref == null || cssref == 'undefined') {
-                    res.status(404).send({status: 404, message: 'not found' });
-                } else {
-                    res.send(err);
-                }
+                res.send(err);
             }
-            res.json(cssref);
+            res.json(cleanResponse(cssref));
         });
     })
     .put(function(req, res) {
-        CssRef.findById(req.params.ref_id, function(err, cssref) {
+        CssRef.findOne({
+            name: req.params.name
+        }, function(err, cssref) {
             if (err) {
                 res.send(err);
             }
@@ -64,13 +68,13 @@ router.route('/css/:ref_id')
                 if (err) {
                     res.send(err);
                 }
-                res.json(cssref);
+                res.json(cleanResponse(cssref));
             });
         });
     })
     .delete(function(req, res) {
         CssRef.remove({
-            _id: req.params.ref_id
+            name: req.params.name
         }, function(err, cssref) {
             if (err) {
                 res.send(err);
